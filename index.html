@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto Tidur Menutupi Marker</title>
+    <title>AR Foto Zoom Sejajar Marker</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -13,20 +13,18 @@
 
   <body style="margin:0; overflow:hidden;">
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
-      
       <a-marker preset="hiro">
-        <!-- FOTO ASLI (720x1280) TIDUR SEJAJAR MARKER -->
+        <!-- Foto portrait, tidur sejajar marker dan diperbesar -->
         <a-image 
           src="foto.jpg"
-          width="1"           <!-- rasio sudah dihitung -->
-          height="1.777"      <!-- 1280 / 720 = 1.777 -->
-          position="0 0 0"
+          width="1.4"          <!-- diperbesar dari 1 -->
+          height="2.488"       <!-- 1.777 * 1.4 agar tetap proporsional -->
+          position="0 0.02 0"  <!-- sedikit mengambang di atas marker -->
           rotation="-90 0 0">
         </a-image>
       </a-marker>
 
       <a-entity camera></a-entity>
-
     </a-scene>
   </body>
 </html>
