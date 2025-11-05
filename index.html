@@ -11,7 +11,6 @@
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
-      /* Tombol kontrol */
       #controls {
         position: fixed;
         bottom: 20px;
@@ -37,7 +36,7 @@
     </style>
 
     <script>
-      // Komponen untuk rotasi manual (drag / touch)
+      // Komponen rotasi manual (drag / touch)
       AFRAME.registerComponent('drag-rotate', {
         schema: { speed: { default: 1 } },
         init: function () {
@@ -45,7 +44,6 @@
           this.previousX = 0;
           const canvas = this.el.sceneEl.canvas;
 
-          // Mouse events
           canvas.addEventListener('mousedown', (e) => {
             this.isDragging = true;
             this.previousX = e.clientX;
@@ -58,7 +56,6 @@
             this.el.object3D.rotation.y += deltaX * 0.01 * this.data.speed;
           });
 
-          // Touch events
           canvas.addEventListener('touchstart', (e) => {
             this.isDragging = true;
             this.previousX = e.touches[0].clientX;
@@ -75,7 +72,7 @@
 
       // Logika ganti foto
       document.addEventListener("DOMContentLoaded", () => {
-        const photos = ["foto1.jpg", "foto2.jpg"]; // daftar foto kamu
+        const photos = ["foto1.jpg", "foto2.jpg"];
         let index = 0;
         const imageEl = document.querySelector("#fotoAR");
 
@@ -102,10 +99,10 @@
           drag-rotate="speed: 2">
         </a-image>
 
-        <!-- MODEL 3D format .gltf -->
+        <!-- MODEL 3D format .gltf (digeser posisi) -->
         <a-entity 
-          gltf-model="model.gltf"     <!-- ganti dengan nama file .gltf kamu -->
-          position="0 0.35 0"         <!-- sedikit di atas foto -->
+          gltf-model="model.gltf"      
+          position="2 0.5 0"          <!-- 🔹 Geser ke kanan (X=0.5) dan lebih tinggi (Y=0.5) -->
           rotation="0 180 0"
           scale="0.5 0.5 0.5"
           animation="property: rotation; to: 0 360 0; loop: true; dur: 6000">
