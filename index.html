@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Model 3D (Samping Kiri, 3x Lebih Besar)</title>
+    <title>AR Foto + Model 3D (Next & Posisi Baru)</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -36,7 +36,7 @@
     </style>
 
     <script>
-      // Komponen rotasi manual (drag / touch)
+      // Komponen drag rotasi
       AFRAME.registerComponent('drag-rotate', {
         schema: { speed: { default: 1 } },
         init: function () {
@@ -44,35 +44,28 @@
           this.previousX = 0;
           const canvas = this.el.sceneEl.canvas;
 
-          // Mouse drag
-          canvas.addEventListener('mousedown', (e) => {
-            this.isDragging = true;
-            this.previousX = e.clientX;
-          });
-          canvas.addEventListener('mouseup', () => { this.isDragging = false; });
-          canvas.addEventListener('mousemove', (e) => {
+          const startDrag = (x) => { this.isDragging = true; this.previousX = x; };
+          const endDrag = () => { this.isDragging = false; };
+          const moveDrag = (x) => {
             if (!this.isDragging) return;
-            const deltaX = e.clientX - this.previousX;
-            this.previousX = e.clientX;
+            const deltaX = x - this.previousX;
+            this.previousX = x;
             this.el.object3D.rotation.y += deltaX * 0.01 * this.data.speed;
-          });
+          };
 
-          // Touch drag
-          canvas.addEventListener('touchstart', (e) => {
-            this.isDragging = true;
-            this.previousX = e.touches[0].clientX;
-          });
-          canvas.addEventListener('touchend', () => { this.isDragging = false; });
-          canvas.addEventListener('touchmove', (e) => {
-            if (!this.isDragging) return;
-            const deltaX = e.touches[0].clientX - this.previousX;
-            this.previousX = e.touches[0].clientX;
-            this.el.object3D.rotation.y += deltaX * 0.01 * this.data.speed;
-          });
+          // Mouse events
+          canvas.addEventListener('mousedown', e => startDrag(e.clientX));
+          canvas.addEventListener('mouseup', endDrag);
+          canvas.addEventListener('mousemove', e => moveDrag(e.clientX));
+
+          // Touch events
+          canvas.addEventListener('touchstart', e => startDrag(e.touches[0].clientX));
+          canvas.addEventListener('touchend', endDrag);
+          canvas.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX));
         }
       });
 
-      // Logika ganti foto
+      // Logika tombol Next
       document.addEventListener("DOMContentLoaded", () => {
         const photos = ["foto1.jpg", "foto2.jpg"];
         let index = 0;
@@ -80,7 +73,8 @@
 
         document.getElementById("nextBtn").addEventListener("click", () => {
           index = (index + 1) % photos.length;
-          imageEl.setAttribute("src", photos[index]);
+          // update src secara benar di A-Frame
+          imageEl.setAttribute("material", "src", photos[index]);
         });
       });
     </script>
@@ -90,7 +84,7 @@
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       
       <a-marker preset="hiro">
-        <!-- FOTO tidur sejajar marker -->
+        <!-- FOTO -->
         <a-image 
           id="fotoAR"
           src="foto1.jpg"
@@ -101,12 +95,12 @@
           drag-rotate="speed: 2">
         </a-image>
 
-        <!-- MODEL 3D format .gltf -->
+        <!-- MODEL 3D (.gltf) -->
         <a-entity 
-          gltf-model="model.gltf"    
-          position="-3 0.3 0"        <!-- 📍 Digeser ke kiri (X=-3) -->
+          gltf-model="model.gltf"
+          position="-3 0.6 0"          <!-- 📍 naik ke atas (Y * 2) & di kiri foto -->
           rotation="0 180 0"
-          scale="1.5 1.5 1.5"        <!-- 📏 Diperbesar 3x dari sebelumnya (0.5 -> 1.5) -->
+          scale="1.5 1.5 1.5"          <!-- 📏 setengah ukuran foto -->
           animation="property: rotation; to: 0 360 0; loop: true; dur: 6000">
         </a-entity>
       </a-marker>
