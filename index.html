@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Model 3D (Next & Posisi Baru)</title>
+    <title>AR Foto + Model 3D (Zoom & Next)</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -36,7 +36,7 @@
     </style>
 
     <script>
-      // Komponen drag rotasi
+      // === Komponen drag untuk rotasi manual ===
       AFRAME.registerComponent('drag-rotate', {
         schema: { speed: { default: 1 } },
         init: function () {
@@ -65,16 +65,30 @@
         }
       });
 
-      // Logika tombol Next
+      // === Logika tombol Next dan Zoom ===
       document.addEventListener("DOMContentLoaded", () => {
         const photos = ["foto1.jpg", "foto2.jpg"];
         let index = 0;
         const imageEl = document.querySelector("#fotoAR");
+        const modelEl = document.querySelector("#model3D");
+        let scaleFactor = 80; // skala awal model
 
+        // Ganti foto
         document.getElementById("nextBtn").addEventListener("click", () => {
           index = (index + 1) % photos.length;
-          // update src secara benar di A-Frame
           imageEl.setAttribute("material", "src", photos[index]);
+        });
+
+        // Zoom In
+        document.getElementById("zoomInBtn").addEventListener("click", () => {
+          scaleFactor *= 1.2; // naik 20%
+          modelEl.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
+        });
+
+        // Zoom Out
+        document.getElementById("zoomOutBtn").addEventListener("click", () => {
+          scaleFactor *= 0.8; // turun 20%
+          modelEl.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
         });
       });
     </script>
@@ -97,10 +111,11 @@
 
         <!-- MODEL 3D (.gltf) -->
         <a-entity 
+          id="model3D"
           gltf-model="model.gltf"
-          position="0 0 -3"          <!-- 📍 naik ke atas (Y * 2) & di kiri foto -->
+          position="0 0 -3"          <!-- 📍 dipindah ke atas (Z=-3), di depan foto -->
           rotation="0 180 0"
-          scale="80 80 80"          <!-- 📏 setengah ukuran foto -->
+          scale="300 300 300"          <!-- 📏 setengah ukuran foto -->
           animation="property: rotation; to: 0 360 0; loop: true; dur: 6000">
         </a-entity>
       </a-marker>
@@ -110,11 +125,9 @@
 
     <!-- Tombol kontrol -->
     <div id="controls">
+      <button id="zoomOutBtn">− Zoom Out</button>
+      <button id="zoomInBtn">+ Zoom In</button>
       <button id="nextBtn">Next Foto ▶</button>
     </div>
   </body>
 </html>
-
-
-
-
