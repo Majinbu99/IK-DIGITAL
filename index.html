@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Model 3D (GLTF)</title>
+    <title>AR Foto + Model 3D (Samping Kiri, 3x Lebih Besar)</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -44,6 +44,7 @@
           this.previousX = 0;
           const canvas = this.el.sceneEl.canvas;
 
+          // Mouse drag
           canvas.addEventListener('mousedown', (e) => {
             this.isDragging = true;
             this.previousX = e.clientX;
@@ -56,6 +57,7 @@
             this.el.object3D.rotation.y += deltaX * 0.01 * this.data.speed;
           });
 
+          // Touch drag
           canvas.addEventListener('touchstart', (e) => {
             this.isDragging = true;
             this.previousX = e.touches[0].clientX;
@@ -99,12 +101,12 @@
           drag-rotate="speed: 2">
         </a-image>
 
-        <!-- MODEL 3D format .gltf (digeser posisi) -->
+        <!-- MODEL 3D format .gltf -->
         <a-entity 
-          gltf-model="model.gltf"      
-          position="2 0.5 0"          <!-- 🔹 Geser ke kanan (X=0.5) dan lebih tinggi (Y=0.5) -->
+          gltf-model="model.gltf"    
+          position="-3 0.3 0"        <!-- 📍 Digeser ke kiri (X=-3) -->
           rotation="0 180 0"
-          scale="0.5 0.5 0.5"
+          scale="1.5 1.5 1.5"        <!-- 📏 Diperbesar 3x dari sebelumnya (0.5 -> 1.5) -->
           animation="property: rotation; to: 0 360 0; loop: true; dur: 6000">
         </a-entity>
       </a-marker>
