@@ -104,7 +104,7 @@
           src="foto1.jpg"
           width="3"
           height="5.331"
-          position="0 0 -4"
+          position="0 -1 0"
           rotation="-90 180 0"
           drag-rotate="speed: 1">
         </a-image>
@@ -113,9 +113,9 @@
         <a-entity 
           id="model3D"
           gltf-model="model.gltf"
-          position="0 0 -3"          <!-- 📍 dipindah ke atas (Z=-3), di depan foto -->
+          position="0 0 -4"          
           rotation="0 180 0"
-          scale="300 300 300"          <!-- 📏 setengah ukuran foto -->
+          scale="300 300 300"          
           animation="property: rotation; to: 0 360 0; loop: true; dur: 6000">
         </a-entity>
       </a-marker>
@@ -131,6 +131,7 @@
     </div>
   </body>
 </html>
+
 
 
 
