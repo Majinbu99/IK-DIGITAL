@@ -4,14 +4,14 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto Bisa Diputar & Ganti Gambar</title>
+    <title>AR Foto + Model 3D (GLTF)</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
-      /* Tombol sederhana di pojok bawah */
+      /* Tombol kontrol */
       #controls {
         position: fixed;
         bottom: 20px;
@@ -37,16 +37,15 @@
     </style>
 
     <script>
-      // Komponen rotasi manual (drag / touch)
+      // Komponen untuk rotasi manual (drag / touch)
       AFRAME.registerComponent('drag-rotate', {
         schema: { speed: { default: 1 } },
         init: function () {
           this.isDragging = false;
           this.previousX = 0;
-
           const canvas = this.el.sceneEl.canvas;
 
-          // Mouse
+          // Mouse events
           canvas.addEventListener('mousedown', (e) => {
             this.isDragging = true;
             this.previousX = e.clientX;
@@ -59,7 +58,7 @@
             this.el.object3D.rotation.y += deltaX * 0.01 * this.data.speed;
           });
 
-          // Touch
+          // Touch events
           canvas.addEventListener('touchstart', (e) => {
             this.isDragging = true;
             this.previousX = e.touches[0].clientX;
@@ -92,7 +91,7 @@
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       
       <a-marker preset="hiro">
-        <!-- FOTO utama (bisa diganti) -->
+        <!-- FOTO tidur sejajar marker -->
         <a-image 
           id="fotoAR"
           src="foto1.jpg"
@@ -102,10 +101,18 @@
           rotation="-90 180 0"
           drag-rotate="speed: 2">
         </a-image>
+
+        <!-- MODEL 3D format .gltf -->
+        <a-entity 
+          gltf-model="model.gltf"     <!-- ganti dengan nama file .gltf kamu -->
+          position="0 0.35 0"         <!-- sedikit di atas foto -->
+          rotation="0 180 0"
+          scale="0.5 0.5 0.5"
+          animation="property: rotation; to: 0 360 0; loop: true; dur: 6000">
+        </a-entity>
       </a-marker>
 
       <a-entity camera></a-entity>
-
     </a-scene>
 
     <!-- Tombol kontrol -->
