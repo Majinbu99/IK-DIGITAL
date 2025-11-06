@@ -4,37 +4,62 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Video + Model 3D (Tombol Rotasi Terpisah)</title>
+    <title>AR Foto + Video + Model 3D (Kontrol Terpisah Lengkap)</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://rawcdn.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
-      body { margin: 0; overflow: hidden; font-family: sans-serif; }
+      body { margin: 0; overflow: hidden; font-family: sans-serif; background: #000; color: #fff; }
+
+      /* Layout tombol utama */
       #controls {
         position: fixed;
-        bottom: 15px;
+        bottom: 10px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
+        flex-direction: column;
+        gap: 15px;
         z-index: 999;
-        background: rgba(0,0,0,0.4);
-        padding: 10px;
+        background: rgba(0,0,0,0.6);
+        padding: 15px;
         border-radius: 10px;
+        max-width: 95%;
       }
+
+      .section {
+        border: 1px solid rgba(255,255,255,0.3);
+        border-radius: 8px;
+        padding: 10px;
+      }
+
+      .section-title {
+        font-weight: bold;
+        margin-bottom: 6px;
+        text-align: center;
+        text-transform: uppercase;
+        color: #ffd700;
+      }
+
+      .btn-group {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 8px;
+      }
+
       button {
         padding: 8px 14px;
-        font-size: 15px;
+        font-size: 14px;
         border: none;
         border-radius: 6px;
         background: #007bff;
         color: white;
         cursor: pointer;
       }
+
       button:hover { background: #0056b3; }
 
       #videoStatus {
@@ -48,6 +73,7 @@
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.3s;
+        z-index: 1000;
       }
     </style>
 
@@ -61,24 +87,29 @@
         const statusIcon = document.getElementById("videoStatus");
         let scaleFactor = 300;
 
-        // Tombol next foto
-        document.getElementById("nextBtn").addEventListener("click", () => {
+        // === FOTO ===
+        document.getElementById("nextFoto").addEventListener("click", () => {
           index = (index + 1) % photos.length;
           imageEl.setAttribute("material", "src", photos[index]);
         });
+        document.getElementById("rotateFotoLeft").addEventListener("click", () => rotateObject(imageEl, -10, 'y'));
+        document.getElementById("rotateFotoRight").addEventListener("click", () => rotateObject(imageEl, 10, 'y'));
+        document.getElementById("resetFoto").addEventListener("click", () => imageEl.setAttribute("rotation", "-90 0 180"));
 
-        // Zoom
-        document.getElementById("zoomInBtn").addEventListener("click", () => {
-          scaleFactor *= 1.2;
-          modelEl.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
-        });
-        document.getElementById("zoomOutBtn").addEventListener("click", () => {
-          scaleFactor *= 0.8;
-          modelEl.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
+        // === MODEL 3D ===
+        document.getElementById("rotate3DLeft").addEventListener("click", () => rotateObject(modelEl, -10, 'y'));
+        document.getElementById("rotate3DRight").addEventListener("click", () => rotateObject(modelEl, 10, 'y'));
+        document.getElementById("rotate3DFront").addEventListener("click", () => rotateObject(modelEl, -10, 'x'));
+        document.getElementById("rotate3DBack").addEventListener("click", () => rotateObject(modelEl, 10, 'x'));
+        document.getElementById("zoomIn3D").addEventListener("click", () => scaleObject(modelEl, 1.2));
+        document.getElementById("zoomOut3D").addEventListener("click", () => scaleObject(modelEl, 0.8));
+        document.getElementById("reset3D").addEventListener("click", () => {
+          modelEl.setAttribute("rotation", "0 0 0");
+          modelEl.setAttribute("scale", "300 300 300");
         });
 
-        // Tombol Play/Pause video
-        document.getElementById("toggleVideoBtn").addEventListener("click", () => {
+        // === VIDEO ===
+        document.getElementById("playPauseVideo").addEventListener("click", () => {
           if (videoEl.paused) {
             videoEl.play();
             showStatus("▶️");
@@ -88,29 +119,29 @@
           }
         });
 
-        // Rotasi Foto
-        document.getElementById("fotoRotateLeft").addEventListener("click", () => rotateObject(imageEl, -10, 'y'));
-        document.getElementById("fotoRotateRight").addEventListener("click", () => rotateObject(imageEl, 10, 'y'));
-
-        // Rotasi Model 3D
-        document.getElementById("modelRotateLeft").addEventListener("click", () => rotateObject(modelEl, -10, 'y'));
-        document.getElementById("modelRotateRight").addEventListener("click", () => rotateObject(modelEl, 10, 'y'));
-
-        // Fungsi rotasi
+        // === Fungsi bantu ===
         function rotateObject(el, delta, axis) {
           const rot = el.getAttribute("rotation");
           rot[axis] += delta;
           el.setAttribute("rotation", rot);
         }
 
-        // Status video tampil sementara
+        function scaleObject(el, factor) {
+          const sc = el.getAttribute("scale");
+          el.setAttribute("scale", {
+            x: sc.x * factor,
+            y: sc.y * factor,
+            z: sc.z * factor
+          });
+        }
+
         function showStatus(icon) {
           statusIcon.textContent = icon;
           statusIcon.style.opacity = "1";
           setTimeout(() => statusIcon.style.opacity = "0", 800);
         }
 
-        // Marker detection
+        // Marker: play/pause otomatis
         const marker = document.querySelector("a-marker");
         marker.addEventListener("markerFound", () => {
           videoEl.play();
@@ -127,6 +158,7 @@
   <body>
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-marker preset="hiro">
+
         <!-- FOTO di kiri -->
         <a-image 
           id="fotoAR"
@@ -155,32 +187,51 @@
           rotation="0 0 0"
           scale="300 300 300">
         </a-entity>
+
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- Elemen video asli -->
+    <!-- VIDEO asli -->
     <video id="video1" src="video.mp4" preload="auto" loop muted playsinline></video>
 
-    <!-- Tombol kontrol -->
+    <!-- TOMBOL KONTROL -->
     <div id="controls">
-      <div>
-        <b>Rotasi Foto:</b>
-        <button id="fotoRotateLeft">↺ Kiri</button>
-        <button id="fotoRotateRight">↻ Kanan</button>
+
+      <!-- FOTO -->
+      <div class="section">
+        <div class="section-title">📸 Foto</div>
+        <div class="btn-group">
+          <button id="rotateFotoLeft">↺ Kiri</button>
+          <button id="rotateFotoRight">↻ Kanan</button>
+          <button id="nextFoto">Next Foto ▶</button>
+          <button id="resetFoto">Reset</button>
+        </div>
       </div>
 
-      <div>
-        <b>Rotasi 3D:</b>
-        <button id="modelRotateLeft">↺ Kiri</button>
-        <button id="modelRotateRight">↻ Kanan</button>
+      <!-- MODEL 3D -->
+      <div class="section">
+        <div class="section-title">🧩 Model 3D</div>
+        <div class="btn-group">
+          <button id="rotate3DLeft">↺ Kiri</button>
+          <button id="rotate3DRight">↻ Kanan</button>
+          <button id="rotate3DFront">⬆️ Depan</button>
+          <button id="rotate3DBack">⬇️ Belakang</button>
+          <button id="zoomIn3D">+ Zoom In</button>
+          <button id="zoomOut3D">− Zoom Out</button>
+          <button id="reset3D">Reset</button>
+        </div>
       </div>
 
-      <button id="zoomOutBtn">− Zoom Out</button>
-      <button id="zoomInBtn">+ Zoom In</button>
-      <button id="nextBtn">Next Foto ▶</button>
-      <button id="toggleVideoBtn">⏯️ Play / Pause Video</button>
+      <!-- VIDEO -->
+      <div class="section">
+        <div class="section-title">🎥 Video</div>
+        <div class="btn-group">
+          <button id="playPauseVideo">⏯️ Play / Pause</button>
+        </div>
+      </div>
+
     </div>
 
     <div id="videoStatus"></div>
