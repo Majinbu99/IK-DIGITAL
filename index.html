@@ -90,8 +90,6 @@
           index = (index + 1) % photos.length;
           imageEl.setAttribute("material", "src", photos[index]);
         });
-        document.getElementById("rotateFotoLeft").addEventListener("click", () => rotateObject(imageEl, -10, 'y'));
-        document.getElementById("rotateFotoRight").addEventListener("click", () => rotateObject(imageEl, 10, 'y'));
         document.getElementById("resetFoto").addEventListener("click", () => imageEl.setAttribute("rotation", "-90 0 0"));
 
         // === MODEL 3D ===
@@ -163,7 +161,7 @@
           gltf-model="model.gltf"
           position="0 1 0"
           rotation="0 0 0"
-          scale="0.2 0.2 0.2">
+          scale="1 1 1">
         </a-entity>
 
         <!-- FOTO di kiri bawah, sudah diputar 180 derajat -->
@@ -233,4 +231,5 @@
     <div id="videoStatus"></div>
   </body>
 </html>
+
 
