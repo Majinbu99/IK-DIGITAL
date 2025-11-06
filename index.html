@@ -2,15 +2,16 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
-    <title>AR Foto + Video + 3D (Rotasi Terpisah Berfungsi)</title>
+    <meta name="viewport"
+          content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
+    <title>AR Foto + Video + Model 3D (Tombol Rotasi Terpisah)</title>
 
-    <!-- A-Frame dan AR.js -->
+    <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
     <script src="https://rawcdn.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
-      body { margin: 0; overflow: hidden; }
+      body { margin: 0; overflow: hidden; font-family: sans-serif; }
       #controls {
         position: fixed;
         bottom: 15px;
@@ -18,15 +19,18 @@
         transform: translateX(-50%);
         display: flex;
         flex-wrap: wrap;
-        gap: 10px;
+        gap: 8px;
         justify-content: center;
         z-index: 999;
+        background: rgba(0,0,0,0.4);
+        padding: 10px;
+        border-radius: 10px;
       }
       button {
-        padding: 10px 16px;
-        font-size: 16px;
+        padding: 8px 14px;
+        font-size: 15px;
         border: none;
-        border-radius: 8px;
+        border-radius: 6px;
         background: #007bff;
         color: white;
         cursor: pointer;
@@ -48,28 +52,6 @@
     </style>
 
     <script>
-      AFRAME.registerComponent('tap-rotate', {
-        schema: { speed: { default: 20 } },
-        init: function () {
-          const el = this.el;
-          let rotation = el.getAttribute('rotation');
-          let target = this.data.target || el;
-
-          // Klik untuk rotasi ke kanan
-          el.addEventListener('click', () => {
-            rotation.y += this.data.speed;
-            el.setAttribute('rotation', rotation);
-          });
-
-          // Sentuh (touch) untuk rotasi ke kiri
-          el.addEventListener('touchstart', e => {
-            e.preventDefault();
-            rotation.y -= this.data.speed;
-            el.setAttribute('rotation', rotation);
-          });
-        }
-      });
-
       document.addEventListener("DOMContentLoaded", () => {
         const photos = ["foto1.jpg", "foto2.jpg"];
         let index = 0;
@@ -79,7 +61,7 @@
         const statusIcon = document.getElementById("videoStatus");
         let scaleFactor = 300;
 
-        // Tombol ganti foto
+        // Tombol next foto
         document.getElementById("nextBtn").addEventListener("click", () => {
           index = (index + 1) % photos.length;
           imageEl.setAttribute("material", "src", photos[index]);
@@ -106,7 +88,29 @@
           }
         });
 
-        // Marker muncul/hilang
+        // Rotasi Foto
+        document.getElementById("fotoRotateLeft").addEventListener("click", () => rotateObject(imageEl, -10, 'y'));
+        document.getElementById("fotoRotateRight").addEventListener("click", () => rotateObject(imageEl, 10, 'y'));
+
+        // Rotasi Model 3D
+        document.getElementById("modelRotateLeft").addEventListener("click", () => rotateObject(modelEl, -10, 'y'));
+        document.getElementById("modelRotateRight").addEventListener("click", () => rotateObject(modelEl, 10, 'y'));
+
+        // Fungsi rotasi
+        function rotateObject(el, delta, axis) {
+          const rot = el.getAttribute("rotation");
+          rot[axis] += delta;
+          el.setAttribute("rotation", rot);
+        }
+
+        // Status video tampil sementara
+        function showStatus(icon) {
+          statusIcon.textContent = icon;
+          statusIcon.style.opacity = "1";
+          setTimeout(() => statusIcon.style.opacity = "0", 800);
+        }
+
+        // Marker detection
         const marker = document.querySelector("a-marker");
         marker.addEventListener("markerFound", () => {
           videoEl.play();
@@ -116,29 +120,6 @@
           videoEl.pause();
           showStatus("⏸️");
         });
-
-        function showStatus(icon) {
-          statusIcon.textContent = icon;
-          statusIcon.style.opacity = "1";
-          setTimeout(() => statusIcon.style.opacity = "0", 800);
-        }
-
-        // Tambah kontrol keyboard rotasi
-        window.addEventListener("keydown", (e) => {
-          const step = 10;
-          const rot3D = modelEl.getAttribute("rotation");
-          const rotImg = imageEl.getAttribute("rotation");
-
-          switch (e.key) {
-            case "ArrowLeft": rot3D.y -= step; break;
-            case "ArrowRight": rot3D.y += step; break;
-            case "ArrowUp": rotImg.y -= step; break;
-            case "ArrowDown": rotImg.y += step; break;
-          }
-
-          modelEl.setAttribute("rotation", rot3D);
-          imageEl.setAttribute("rotation", rotImg);
-        });
       });
     </script>
   </head>
@@ -146,15 +127,14 @@
   <body>
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-marker preset="hiro">
-        <!-- FOTO: klik / tap untuk rotasi -->
+        <!-- FOTO di kiri -->
         <a-image 
           id="fotoAR"
           src="foto1.jpg"
           width="3"
           height="5.331"
           position="-1.3 -1 0"
-          rotation="-90 0 180"
-          tap-rotate="speed: 3">
+          rotation="-90 0 180">
         </a-image>
 
         <!-- VIDEO di kanan -->
@@ -167,25 +147,36 @@
           rotation="-90 0 180">
         </a-video>
 
-        <!-- MODEL 3D: klik/tap juga bisa rotasi -->
+        <!-- MODEL 3D di tengah -->
         <a-entity 
           id="model3D"
           gltf-model="model.gltf"
-          position="0 0 1"
+          position="0 0 0"
           rotation="0 0 0"
-          scale="300 300 300"
-          tap-rotate="speed: 3">
+          scale="300 300 300">
         </a-entity>
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- Video asli -->
+    <!-- Elemen video asli -->
     <video id="video1" src="video.mp4" preload="auto" loop muted playsinline></video>
 
     <!-- Tombol kontrol -->
     <div id="controls">
+      <div>
+        <b>Rotasi Foto:</b>
+        <button id="fotoRotateLeft">↺ Kiri</button>
+        <button id="fotoRotateRight">↻ Kanan</button>
+      </div>
+
+      <div>
+        <b>Rotasi 3D:</b>
+        <button id="modelRotateLeft">↺ Kiri</button>
+        <button id="modelRotateRight">↻ Kanan</button>
+      </div>
+
       <button id="zoomOutBtn">− Zoom Out</button>
       <button id="zoomInBtn">+ Zoom In</button>
       <button id="nextBtn">Next Foto ▶</button>
