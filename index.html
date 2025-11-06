@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Video + Model 3D (Posisi dan Tombol Lengkap)</title>
+    <title>AR Foto + Video + Model 3D (Rotasi Foto 180°)</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -92,7 +92,7 @@
         });
         document.getElementById("rotateFotoLeft").addEventListener("click", () => rotateObject(imageEl, -10, 'y'));
         document.getElementById("rotateFotoRight").addEventListener("click", () => rotateObject(imageEl, 10, 'y'));
-        document.getElementById("resetFoto").addEventListener("click", () => imageEl.setAttribute("rotation", "-90 0 180"));
+        document.getElementById("resetFoto").addEventListener("click", () => imageEl.setAttribute("rotation", "-90 0 0"));
 
         // === MODEL 3D ===
         document.getElementById("rotate3DLeft").addEventListener("click", () => rotateObject(modelEl, -10, 'y'));
@@ -163,17 +163,17 @@
           gltf-model="model.gltf"
           position="0 0.5 0"
           rotation="0 0 0"
-          scale="300 300 300">
+          scale="5 5 5">
         </a-entity>
 
-        <!-- FOTO di kiri bawah -->
+        <!-- FOTO di kiri bawah, sudah diputar 180 derajat -->
         <a-image 
           id="fotoAR"
           src="foto1.jpg"
           width="3"
           height="5.331"
           position="-1.5 -1 0"
-          rotation="-90 0 180">
+          rotation="-90 0 0">
         </a-image>
 
         <!-- VIDEO di kanan bawah -->
