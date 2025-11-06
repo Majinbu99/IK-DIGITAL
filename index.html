@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Model 3D (Zoom & Next)</title>
+    <title>AR Foto + Video + Model 3D</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -71,7 +71,8 @@
         let index = 0;
         const imageEl = document.querySelector("#fotoAR");
         const modelEl = document.querySelector("#model3D");
-        let scaleFactor = 80; // skala awal model
+        const videoEl = document.querySelector("#video1");
+        let scaleFactor = 80;
 
         // Ganti foto
         document.getElementById("nextBtn").addEventListener("click", () => {
@@ -81,15 +82,20 @@
 
         // Zoom In
         document.getElementById("zoomInBtn").addEventListener("click", () => {
-          scaleFactor *= 1.2; // naik 20%
+          scaleFactor *= 1.2;
           modelEl.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
         });
 
         // Zoom Out
         document.getElementById("zoomOutBtn").addEventListener("click", () => {
-          scaleFactor *= 0.8; // turun 20%
+          scaleFactor *= 0.8;
           modelEl.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
         });
+
+        // Play/pause video otomatis saat marker muncul/hilang
+        const marker = document.querySelector("a-marker");
+        marker.addEventListener("markerFound", () => videoEl.play());
+        marker.addEventListener("markerLost", () => videoEl.pause());
       });
     </script>
   </head>
@@ -98,29 +104,42 @@
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       
       <a-marker preset="hiro">
-        <!-- FOTO -->
+        <!-- FOTO di kiri -->
         <a-image 
           id="fotoAR"
           src="foto1.jpg"
           width="3"
           height="5.331"
-          position="0 -1 0"
+          position="-1.8 -1 0"
           rotation="-90 180 0"
           drag-rotate="speed: 1">
         </a-image>
 
-        <!-- MODEL 3D (.gltf) -->
+        <!-- VIDEO di kanan -->
+        <a-video
+          id="videoAR"
+          src="#video1"
+          width="3"
+          height="1.7"
+          position="1.8 -1 0"
+          rotation="-90 180 0">
+        </a-video>
+
+        <!-- MODEL 3D -->
         <a-entity 
           id="model3D"
           gltf-model="model.gltf"
           position="0 0 -2"          
           rotation="0 0 0"
-          scale="300 300 300"          
+          scale="300 300 300">
         </a-entity>
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
+
+    <!-- Elemen video (harus di luar a-scene) -->
+    <video id="video1" src="video.mp4" preload="auto" loop muted playsinline></video>
 
     <!-- Tombol kontrol -->
     <div id="controls">
@@ -130,10 +149,3 @@
     </div>
   </body>
 </html>
-
-
-
-
-
-
-
