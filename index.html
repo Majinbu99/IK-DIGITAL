@@ -2,65 +2,53 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport"
-          content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Video + Model 3D (Rotasi Foto 180°)</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>AR Segitiga: Foto + Video + Model 3D</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://rawcdn.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
-      body { margin: 0; overflow: hidden; font-family: sans-serif; background: #000; color: #fff; }
+      body { margin: 0; overflow: hidden; font-family: sans-serif; }
 
+      /* Tata letak tombol */
       #controls {
         position: fixed;
-        bottom: 10px;
-        left: 50%;
-        transform: translateX(-50%);
+        bottom: 20px;
+        width: 100%;
         display: flex;
         flex-direction: column;
-        gap: 15px;
+        align-items: center;
+        gap: 12px;
         z-index: 999;
-        background: rgba(0,0,0,0.6);
-        padding: 15px;
-        border-radius: 10px;
-        max-width: 95%;
       }
-
-      .section {
-        border: 1px solid rgba(255,255,255,0.3);
-        border-radius: 8px;
-        padding: 10px;
-      }
-
-      .section-title {
-        font-weight: bold;
-        margin-bottom: 6px;
-        text-align: center;
-        text-transform: uppercase;
-        color: #ffd700;
-      }
-
-      .btn-group {
+      .group {
         display: flex;
-        flex-wrap: wrap;
+        gap: 10px;
         justify-content: center;
-        gap: 8px;
+        flex-wrap: wrap;
       }
-
       button {
-        padding: 8px 14px;
-        font-size: 14px;
+        padding: 10px 16px;
+        font-size: 15px;
         border: none;
-        border-radius: 6px;
+        border-radius: 8px;
         background: #007bff;
         color: white;
         cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       }
-
       button:hover { background: #0056b3; }
 
+      /* Label bagian */
+      h3 {
+        margin: 5px 0;
+        color: white;
+        text-shadow: 0 0 5px black;
+      }
+
+      /* Status video di tengah layar */
       #videoStatus {
         position: fixed;
         top: 50%;
@@ -78,36 +66,33 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        const photos = ["foto1.jpg", "foto2.jpg"];
-        let index = 0;
-        const imageEl = document.querySelector("#fotoAR");
-        const modelEl = document.querySelector("#model3D");
+        const model3D = document.querySelector("#model3d");
         const videoEl = document.querySelector("#video1");
+        const videoAR = document.querySelector("#videoAR");
         const statusIcon = document.getElementById("videoStatus");
+        let rotY3D = 0;
+        let rotX3D = 0;
 
-        // === FOTO ===
-        document.getElementById("nextFoto").addEventListener("click", () => {
-          index = (index + 1) % photos.length;
-          imageEl.setAttribute("material", "src", photos[index]);
+        // Tombol rotasi gambar 3D
+        document.getElementById("rotateLeft3D").addEventListener("click", () => {
+          rotY3D -= 10;
+          model3D.setAttribute("rotation", `0 ${rotY3D} 0`);
         });
-        document.getElementById("rotateFotoLeft").addEventListener("click", () => rotateObject(imageEl, -10, 'y'));
-        document.getElementById("rotateFotoRight").addEventListener("click", () => rotateObject(imageEl, 10, 'y'));
-        document.getElementById("resetFoto").addEventListener("click", () => imageEl.setAttribute("rotation", "-90 0 0"));
-
-        // === MODEL 3D ===
-        document.getElementById("rotate3DLeft").addEventListener("click", () => rotateObject(modelEl, -10, 'y'));
-        document.getElementById("rotate3DRight").addEventListener("click", () => rotateObject(modelEl, 10, 'y'));
-        document.getElementById("rotate3DFront").addEventListener("click", () => rotateObject(modelEl, -10, 'x'));
-        document.getElementById("rotate3DBack").addEventListener("click", () => rotateObject(modelEl, 10, 'x'));
-        document.getElementById("zoomIn3D").addEventListener("click", () => scaleObject(modelEl, 1.2));
-        document.getElementById("zoomOut3D").addEventListener("click", () => scaleObject(modelEl, 0.8));
-        document.getElementById("reset3D").addEventListener("click", () => {
-          modelEl.setAttribute("rotation", "0 0 0");
-          modelEl.setAttribute("scale", "300 300 300");
+        document.getElementById("rotateRight3D").addEventListener("click", () => {
+          rotY3D += 10;
+          model3D.setAttribute("rotation", `0 ${rotY3D} 0`);
+        });
+        document.getElementById("rotateFront3D").addEventListener("click", () => {
+          rotX3D -= 10;
+          model3D.setAttribute("rotation", `${rotX3D} ${rotY3D} 0`);
+        });
+        document.getElementById("rotateBack3D").addEventListener("click", () => {
+          rotX3D += 10;
+          model3D.setAttribute("rotation", `${rotX3D} ${rotY3D} 0`);
         });
 
-        // === VIDEO ===
-        document.getElementById("playPauseVideo").addEventListener("click", () => {
+        // Tombol play/pause video
+        document.getElementById("toggleVideoBtn").addEventListener("click", () => {
           if (videoEl.paused) {
             videoEl.play();
             showStatus("▶️");
@@ -117,29 +102,7 @@
           }
         });
 
-        // === Fungsi bantu ===
-        function rotateObject(el, delta, axis) {
-          const rot = el.getAttribute("rotation");
-          rot[axis] += delta;
-          el.setAttribute("rotation", rot);
-        }
-
-        function scaleObject(el, factor) {
-          const sc = el.getAttribute("scale");
-          el.setAttribute("scale", {
-            x: sc.x * factor,
-            y: sc.y * factor,
-            z: sc.z * factor
-          });
-        }
-
-        function showStatus(icon) {
-          statusIcon.textContent = icon;
-          statusIcon.style.opacity = "1";
-          setTimeout(() => statusIcon.style.opacity = "0", 800);
-        }
-
-        // Marker play/pause otomatis
+        // Marker event
         const marker = document.querySelector("a-marker");
         marker.addEventListener("markerFound", () => {
           videoEl.play();
@@ -149,91 +112,84 @@
           videoEl.pause();
           showStatus("⏸️");
         });
+
+        function showStatus(icon) {
+          statusIcon.textContent = icon;
+          statusIcon.style.opacity = "1";
+          setTimeout(() => statusIcon.style.opacity = "0", 800);
+        }
       });
     </script>
   </head>
 
-  <body>
+  <body style="background:black;">
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-marker preset="hiro">
-
-        <!-- MODEL 3D di tengah atas -->
-        <a-entity 
-          id="model3D"
-          gltf-model="model.gltf"
-          position="1.5 4 0"
-          rotation="0 0 0"
-          scale="2 2 2">
+        
+        <!-- Gambar 3D di atas tengah marker -->
+        <a-entity
+          id="model3d"
+          gltf-model="model.glb"
+          position="0 0 0"
+          scale="0.5 0.5 0.5"
+          rotation="0 0 0">
         </a-entity>
 
-        <!-- FOTO di kiri bawah, sudah diputar 180 derajat -->
-        <a-image 
+        <!-- Foto di bawah kiri -->
+        <a-image
           id="fotoAR"
-          src="foto1.jpg"
-          width="3"
-          height="5.331"
-          position="-1.3 -1 0"
-          rotation="-90 0 0">
+          src="foto.jpg"
+          width="2"
+          height="1.2"
+          position="-1 0 1.5"
+          rotation="-90 0 180">
         </a-image>
 
-        <!-- VIDEO di kanan bawah -->
+        <!-- Video di bawah kanan -->
         <a-video
           id="videoAR"
           src="#video1"
           width="2"
-          height="3.75"
-          position="1.3 -2 0"
+          height="1.2"
+          position="1 0 1.5"
           rotation="-90 0 180">
         </a-video>
-
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- VIDEO sumber -->
+    <!-- Elemen video asli -->
     <video id="video1" src="video.mp4" preload="auto" loop muted playsinline></video>
 
-    <!-- KONTROL -->
-    <div id="controls">
-
-      <!-- FOTO -->
-      <div class="section">
-        <div class="section-title">📸 Foto</div>
-        <div class="btn-group">
-          <button id="rotateFotoLeft">↺ Kiri</button>
-          <button id="rotateFotoRight">↻ Kanan</button>
-          <button id="nextFoto">Next Foto ▶</button>
-          <button id="resetFoto">Reset</button>
-        </div>
-      </div>
-
-      <!-- MODEL 3D -->
-      <div class="section">
-        <div class="section-title">🧩 Model 3D</div>
-        <div class="btn-group">
-          <button id="rotate3DLeft">↺ Kiri</button>
-          <button id="rotate3DRight">↻ Kanan</button>
-          <button id="rotate3DFront">⬆️ Depan</button>
-          <button id="rotate3DBack">⬇️ Belakang</button>
-          <button id="zoomIn3D">+ Zoom In</button>
-          <button id="zoomOut3D">− Zoom Out</button>
-          <button id="reset3D">Reset</button>
-        </div>
-      </div>
-
-      <!-- VIDEO -->
-      <div class="section">
-        <div class="section-title">🎥 Video</div>
-        <div class="btn-group">
-          <button id="playPauseVideo">⏯️ Play / Pause</button>
-        </div>
-      </div>
-
-    </div>
-
+    <!-- Ikon status video -->
     <div id="videoStatus"></div>
+
+    <!-- Tombol kontrol -->
+    <div id="controls">
+      <div>
+        <h3>Gambar 3D</h3>
+        <div class="group">
+          <button id="rotateLeft3D">↩️ Putar Kiri</button>
+          <button id="rotateRight3D">↪️ Putar Kanan</button>
+          <button id="rotateFront3D">⬆️ Miring Depan</button>
+          <button id="rotateBack3D">⬇️ Miring Belakang</button>
+        </div>
+      </div>
+
+      <div>
+        <h3>Foto</h3>
+        <div class="group">
+          <span style="color:white;">📸 Tidak ada kontrol rotasi</span>
+        </div>
+      </div>
+
+      <div>
+        <h3>Video</h3>
+        <div class="group">
+          <button id="toggleVideoBtn">⏯️ Play / Pause</button>
+        </div>
+      </div>
+    </div>
   </body>
 </html>
-
-
