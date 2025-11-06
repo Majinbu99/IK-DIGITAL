@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport"
           content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Video + Model 3D</title>
+    <title>AR Foto + Video + Model 3D (Play/Pause Video)</title>
 
     <!-- A-Frame & AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
@@ -72,6 +72,7 @@
         const imageEl = document.querySelector("#fotoAR");
         const modelEl = document.querySelector("#model3D");
         const videoEl = document.querySelector("#video1");
+        const videoPlane = document.querySelector("#videoAR");
         let scaleFactor = 80;
 
         // Ganti foto
@@ -92,10 +93,19 @@
           modelEl.setAttribute("scale", `${scaleFactor} ${scaleFactor} ${scaleFactor}`);
         });
 
-        // Play/pause video otomatis saat marker muncul/hilang
+        // === Marker: play/pause otomatis saat marker muncul/hilang ===
         const marker = document.querySelector("a-marker");
         marker.addEventListener("markerFound", () => videoEl.play());
         marker.addEventListener("markerLost", () => videoEl.pause());
+
+        // === Klik pada video untuk play/pause ===
+        videoPlane.addEventListener("click", () => {
+          if (videoEl.paused) {
+            videoEl.play();
+          } else {
+            videoEl.pause();
+          }
+        });
       });
     </script>
   </head>
@@ -110,7 +120,7 @@
           src="foto1.jpg"
           width="3"
           height="5.331"
-          position="-1.8 -1 0"
+          position="-1.6 -1 0"
           rotation="-90 180 0"
           drag-rotate="speed: 1">
         </a-image>
@@ -120,9 +130,10 @@
           id="videoAR"
           src="#video1"
           width="3"
-          height="1.7"
-          position="1.8 -1 0"
-          rotation="-90 180 0">
+          height="2"
+          position="1.6 -1 0"
+          rotation="-90 180 0"
+          class="clickable">
         </a-video>
 
         <!-- MODEL 3D -->
