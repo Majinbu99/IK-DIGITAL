@@ -2,19 +2,18 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <meta name="viewport"
-          content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width">
-    <title>AR Foto + Video + Model 3D (Rotasi Terpisah)</title>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+    <title>AR Foto + Video + 3D (Rotasi Terpisah Berfungsi)</title>
 
-    <!-- A-Frame & AR.js -->
+    <!-- A-Frame dan AR.js -->
     <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://rawcdn.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
       body { margin: 0; overflow: hidden; }
       #controls {
         position: fixed;
-        bottom: 20px;
+        bottom: 15px;
         left: 50%;
         transform: translateX(-50%);
         display: flex;
@@ -31,7 +30,6 @@
         background: #007bff;
         color: white;
         cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
       }
       button:hover { background: #0056b3; }
 
@@ -45,45 +43,30 @@
         text-shadow: 0 0 10px black;
         opacity: 0;
         pointer-events: none;
-        z-index: 1000;
         transition: opacity 0.3s;
       }
     </style>
 
     <script>
-      // === Komponen drag untuk rotasi objek tertentu ===
-      AFRAME.registerComponent('drag-rotate-object', {
-        schema: { speed: { default: 1 } },
+      AFRAME.registerComponent('tap-rotate', {
+        schema: { speed: { default: 20 } },
         init: function () {
           const el = this.el;
-          let isDragging = false;
-          let previous = { x: 0, y: 0 };
+          let rotation = el.getAttribute('rotation');
+          let target = this.data.target || el;
 
-          const startDrag = (x, y) => {
-            isDragging = true;
-            previous.x = x;
-            previous.y = y;
-          };
-          const endDrag = () => { isDragging = false; };
-          const moveDrag = (x, y) => {
-            if (!isDragging) return;
-            const deltaX = x - previous.x;
-            const deltaY = y - previous.y;
-            previous.x = x;
-            previous.y = y;
-            const rot = el.object3D.rotation;
-            rot.x += deltaY * 0.01 * this.data.speed;
-            rot.z += deltaX * 0.01 * this.data.speed;
-          };
+          // Klik untuk rotasi ke kanan
+          el.addEventListener('click', () => {
+            rotation.y += this.data.speed;
+            el.setAttribute('rotation', rotation);
+          });
 
-          // Hanya aktif bila diseret pada objek ini
-          el.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
-          window.addEventListener('mouseup', endDrag);
-          window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
-
-          el.addEventListener('touchstart', e => startDrag(e.touches[0].clientX, e.touches[0].clientY));
-          window.addEventListener('touchend', endDrag);
-          window.addEventListener('touchmove', e => moveDrag(e.touches[0].clientX, e.touches[0].clientY));
+          // Sentuh (touch) untuk rotasi ke kiri
+          el.addEventListener('touchstart', e => {
+            e.preventDefault();
+            rotation.y -= this.data.speed;
+            el.setAttribute('rotation', rotation);
+          });
         }
       });
 
@@ -94,9 +77,9 @@
         const modelEl = document.querySelector("#model3D");
         const videoEl = document.querySelector("#video1");
         const statusIcon = document.getElementById("videoStatus");
-        let scaleFactor = 80;
+        let scaleFactor = 300;
 
-        // Tombol Next Foto
+        // Tombol ganti foto
         document.getElementById("nextBtn").addEventListener("click", () => {
           index = (index + 1) % photos.length;
           imageEl.setAttribute("material", "src", photos[index]);
@@ -139,6 +122,23 @@
           statusIcon.style.opacity = "1";
           setTimeout(() => statusIcon.style.opacity = "0", 800);
         }
+
+        // Tambah kontrol keyboard rotasi
+        window.addEventListener("keydown", (e) => {
+          const step = 10;
+          const rot3D = modelEl.getAttribute("rotation");
+          const rotImg = imageEl.getAttribute("rotation");
+
+          switch (e.key) {
+            case "ArrowLeft": rot3D.y -= step; break;
+            case "ArrowRight": rot3D.y += step; break;
+            case "ArrowUp": rotImg.y -= step; break;
+            case "ArrowDown": rotImg.y += step; break;
+          }
+
+          modelEl.setAttribute("rotation", rot3D);
+          imageEl.setAttribute("rotation", rotImg);
+        });
       });
     </script>
   </head>
@@ -146,7 +146,7 @@
   <body>
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       <a-marker preset="hiro">
-        <!-- FOTO di kiri: bisa dirotasi sendiri -->
+        <!-- FOTO: klik / tap untuk rotasi -->
         <a-image 
           id="fotoAR"
           src="foto1.jpg"
@@ -154,7 +154,7 @@
           height="5.331"
           position="-1.3 -1 0"
           rotation="-90 0 180"
-          drag-rotate-object="speed: 0.3">
+          tap-rotate="speed: 3">
         </a-image>
 
         <!-- VIDEO di kanan -->
@@ -162,26 +162,26 @@
           id="videoAR"
           src="#video1"
           width="2"
-          height="4"
+          height="3.75"
           position="1.3 -1 0"
           rotation="-90 0 180">
         </a-video>
 
-        <!-- MODEL 3D: bisa dirotasi terpisah -->
+        <!-- MODEL 3D: klik/tap juga bisa rotasi -->
         <a-entity 
           id="model3D"
           gltf-model="model.gltf"
-          position="0 0 0"          
+          position="0 0 1"
           rotation="0 0 0"
-          scale="0.5 0.5 0.5"
-          drag-rotate-object="speed: 0.3">
+          scale="300 300 300"
+          tap-rotate="speed: 3">
         </a-entity>
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- Elemen video asli -->
+    <!-- Video asli -->
     <video id="video1" src="video.mp4" preload="auto" loop muted playsinline></video>
 
     <!-- Tombol kontrol -->
@@ -192,7 +192,6 @@
       <button id="toggleVideoBtn">⏯️ Play / Pause Video</button>
     </div>
 
-    <!-- Ikon status video -->
     <div id="videoStatus"></div>
   </body>
 </html>
